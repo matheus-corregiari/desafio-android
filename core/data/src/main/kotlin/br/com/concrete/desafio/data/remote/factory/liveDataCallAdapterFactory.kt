@@ -1,12 +1,16 @@
 package br.com.concrete.desafio.data.remote.factory
 
 import br.com.concrete.desafio.data.extension.loadingResponse
+import br.com.concrete.desafio.data.extension.nextPage
 import br.com.concrete.desafio.data.extension.toDataResponse
 import br.com.concrete.desafio.data.extension.toErrorResponse
 import br.com.concrete.desafio.data.livedata.ResponseLiveData
+import br.com.concrete.desafio.data.model.Page
 import br.com.concrete.desafio.data.model.enum.DataResultStatus.SUCCESS
+import org.greenrobot.eventbus.EventBus
 import retrofit2.Call
 import retrofit2.CallAdapter
+import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.IOException
 import java.lang.Exception
@@ -38,9 +42,15 @@ internal class LiveDataCallAdapter<RESULT>(private val responseType: Type) : Cal
             override fun compute() {
                 try {
                     postValue(loadingResponse())
-                    postValue(makeRequest(call).toDataResponse(SUCCESS))
+
+                    val response = makeRequest(call)
+                    val data = response.body()
+                    if (data is Page<*>) data.nextPage = response.nextPage()
+
+                    postValue(data.toDataResponse(SUCCESS))
                 } catch (error: Exception) {
                     postValue(error.toErrorResponse())
+                    EventBus.getDefault().post(error)
                     throw error
                 }
             }
@@ -48,10 +58,10 @@ internal class LiveDataCallAdapter<RESULT>(private val responseType: Type) : Cal
     }
 
     @Throws(IOException::class)
-    private fun <T> makeRequest(call: Call<T>): T? {
+    private fun <T> makeRequest(call: Call<T>): Response<T> {
         return if (call.isExecuted)
-            call.clone().execute().body()
+            call.clone().execute()
         else
-            call.execute().body()
+            call.execute()
     }
 }

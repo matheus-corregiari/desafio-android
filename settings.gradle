@@ -1,7 +1,7 @@
 include ':app'
 
 // Core Modules
-include ':core:data', ':core:base'
+include ':core:data', ':core:base', ':core:test'
 
 // Feature Modules
 include ':feature:repo', ':feature:pullrequest'

@@ -11,7 +11,6 @@ interface RepoRepository {
     fun requestPage(page: Int): ResponseLiveData<Page<RepoDTO>>
 
     fun list(): ResponseLiveData<Page<RepoDTO>>
-
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -20,5 +19,4 @@ internal class RepoRepositoryImpl : RepoRepository {
     override fun requestPage(page: Int) = api.searchRepositories(page = page, perPage = 10)
 
     override fun list() = requestPage(0)
-
 }

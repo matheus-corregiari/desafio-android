@@ -1,36 +1,29 @@
 package br.com.concrete.desafio.base
 
-import android.arch.lifecycle.ViewModelProviders
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
-import br.com.concrete.desafio.data.extension.observe
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
+import br.com.concrete.desafio.base.extension.snack
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 
 abstract class BaseActivity : AppCompatActivity() {
 
-    open fun handleError(error: Throwable) {
-
-    }
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == android.R.id.home) onBackPressed()
+        if (item.itemId == android.R.id.home) onHomeClick()
         return super.onOptionsItemSelected(item)
     }
-}
 
-class Delegate<T : BaseViewModel>(val clazz: KClass<T>) {
+    protected open fun onHomeClick() = finish()
 
-    private var viewModel: T? = null
-
-    operator fun getValue(thisRef: BaseActivity, property: KProperty<*>): T {
-        if (viewModel == null) {
-            viewModel = ViewModelProviders.of(thisRef).get(clazz.java)
-            viewModel!!.errorLiveData.observe(thisRef, thisRef::handleError)
-        }
-        return viewModel!!
+    /**
+     * This method will be called whenever data module exception was detected
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    open fun onDefaultErrorReceived(error: Throwable) {
+        // TODO Do something
     }
 
+    open fun onErrorReceived(error: Throwable) {
+        snack(error.message ?: "")
+    }
 }
-
-fun <T : BaseViewModel> viewModelProvider(clazz: KClass<T>) = Delegate(clazz)

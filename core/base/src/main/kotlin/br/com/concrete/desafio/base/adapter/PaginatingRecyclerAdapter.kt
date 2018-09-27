@@ -1,17 +1,19 @@
 package br.com.concrete.desafio.base.adapter
 
 import android.content.Context
-import android.os.Parcelable
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import br.com.arch.toolkit.recycler.adapter.BaseRecyclerAdapter
+import br.com.arch.toolkit.recycler.adapter.BaseViewHolder
 import br.com.arch.toolkit.recycler.adapter.ViewBinder
+import br.com.concrete.desafio.base.adapter.item.ProgressItemView
 import br.com.concrete.desafio.data.model.Page
 
 private const val PROGRESS_TAG = "PaginatingRecyclerAdapter.ProgressTag"
 private const val TYPE_PROGRESS = 999
 
-open class PaginatingRecyclerAdapter<T : Parcelable> : BaseRecyclerAdapter<T>() {
+open class PaginatingRecyclerAdapter<MODEL, VIEW>(private val creator: (context: Context) -> VIEW)
+    : BaseRecyclerAdapter<MODEL>() where VIEW : View, VIEW : ViewBinder<MODEL> {
 
     private var loadMore: ((Int) -> Unit)? = null
     private var hasLoadingItem: Boolean = false
@@ -21,23 +23,26 @@ open class PaginatingRecyclerAdapter<T : Parcelable> : BaseRecyclerAdapter<T>() 
 
     override fun viewCreator(context: Context, viewType: Int): ViewBinder<*> {
         return when (viewType) {
-            TYPE_PROGRESS -> object : ViewBinder<Any> {
-                override fun bind(model: Any) {}
-            }
-            else -> object : ViewBinder<Any> {
-                override fun bind(model: Any) {}
-            }
+            TYPE_PROGRESS -> ProgressItemView(context).apply { tag = PROGRESS_TAG }
+            else -> creator.invoke(context)
+        }
+    }
+
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
+        when (getItemViewType(position)) {
+            TYPE_PROGRESS -> bindHolder(holder, hasError, ::onProgressErrorClick)
+            else -> super.onBindViewHolder(holder, position)
         }
     }
 
     override fun getItemViewType(position: Int): Int {
         return when (position) {
-            itemCount -> TYPE_PROGRESS
+            items.size -> TYPE_PROGRESS
             else -> super.getItemViewType(position)
         }
     }
 
-    override fun getItemCount() = super.getItemCount() + (if (hasLoadingItem) 1 else 0)
+    override fun getItemCount() = super.getItemCount() + if (hasLoadingItem) 1 else 0
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
         super.onAttachedToRecyclerView(recyclerView)
@@ -56,12 +61,12 @@ open class PaginatingRecyclerAdapter<T : Parcelable> : BaseRecyclerAdapter<T>() 
         })
     }
 
-    fun loadMore(loadMore: (Int) -> Unit): PaginatingRecyclerAdapter<T> {
+    fun loadMore(loadMore: (Int) -> Unit): PaginatingRecyclerAdapter<MODEL, VIEW> {
         this.loadMore = loadMore
         return this
     }
 
-    fun addPage(page: Page<T>) {
+    fun addPage(page: Page<MODEL>) {
         if (nextPage?.equals(page.nextPage) == true) return
         nextPage = page.nextPage
         hasError = false
@@ -69,7 +74,8 @@ open class PaginatingRecyclerAdapter<T : Parcelable> : BaseRecyclerAdapter<T>() 
 
         if (hasLoadingItem) removeLoadingItem()
 
-        page.items.forEach(::addItem)
+        setList(items.plus(page.items))
+
         if (!hasLoadingItem && nextPage != null) insertLoadingItem()
     }
 
@@ -91,4 +97,9 @@ open class PaginatingRecyclerAdapter<T : Parcelable> : BaseRecyclerAdapter<T>() 
         notifyItemInserted(itemCount - 1)
     }
 
+    private fun onProgressErrorClick(model: Boolean) {
+        hasError = !model
+        notifyItemChanged(items.size)
+        nextPage?.let { loadMore?.invoke(it) }
+    }
 }

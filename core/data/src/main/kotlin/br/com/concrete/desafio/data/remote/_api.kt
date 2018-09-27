@@ -40,7 +40,6 @@ internal interface GithubApi {
             @Query("sort") sort: String? = null,
             @Query("direction") order: String? = null
     ): ResponseLiveData<List<PullRequestDTO>>
-
 }
 
 internal val api: GithubApi by lazy {

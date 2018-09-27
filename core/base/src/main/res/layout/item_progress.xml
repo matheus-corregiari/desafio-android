@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/itemProgressRoot"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/progress_item_root"
     android:layout_width="match_parent"
-    android:layout_height="65dp">
+    android:layout_height="65dp"
+    tools:parentTag="android.widget.FrameLayout">
 
     <ProgressBar
-        android:id="@+id/progress"
+        android:id="@+id/progress_item_progress"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_gravity="center"
@@ -13,7 +15,7 @@
         android:padding="5dp" />
 
     <TextView
-        android:id="@+id/errorText"
+        android:id="@+id/progress_item_try_again"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_gravity="center"
@@ -24,4 +26,4 @@
         android:textColor="?attr/colorAccent"
         android:textStyle="bold" />
 
-</FrameLayout>
+</merge>

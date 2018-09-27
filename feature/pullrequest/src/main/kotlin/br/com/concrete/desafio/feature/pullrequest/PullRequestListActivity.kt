@@ -5,21 +5,21 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.transition.Fade
-import android.transition.Transition
-import android.view.ViewGroup
+import android.view.View
 import br.com.arch.toolkit.recycler.adapter.SimpleAdapter
-import br.com.arch.toolkit.statemachine.SceneStateMachine
+import br.com.arch.toolkit.statemachine.ViewStateMachine
 import br.com.arch.toolkit.statemachine.config
-import br.com.arch.toolkit.statemachine.scene
 import br.com.arch.toolkit.statemachine.setup
 import br.com.arch.toolkit.statemachine.state
 import br.com.concrete.desafio.base.BaseActivity
+import br.com.concrete.desafio.base.delegate.extraProvider
+import br.com.concrete.desafio.base.delegate.viewModelProvider
+import br.com.concrete.desafio.base.delegate.viewProvider
 import br.com.concrete.desafio.base.extension.addStatusBarPadding
 import br.com.concrete.desafio.base.extension.enableBack
-import br.com.concrete.desafio.base.extension.toast
-import br.com.concrete.desafio.base.viewModelProvider
+import br.com.concrete.desafio.base.extension.snack
 import br.com.concrete.desafio.data.model.dto.PullRequestDTO
+import br.com.concrete.desafio.data.model.dto.RepoDTO
 import br.com.concrete.desafio.feature.pullrequest.item.PullRequestItemView
 
 private const val LIST_STATE = 0
@@ -30,77 +30,93 @@ private const val ERROR_STATE = 3
 class PullRequestListActivity : BaseActivity() {
 
     private val viewModel by viewModelProvider(PullRequestListViewModel::class)
+    private val stateMachine = ViewStateMachine()
+    private val adapter = SimpleAdapter(::PullRequestItemView)
+            .withListener(::onPullRequestClick)
 
-    private val stateMachine = SceneStateMachine()
-    private val fade: Transition = Fade()
-    private val adapter = SimpleAdapter(::PullRequestItemView).withListener(::onPullRequestClick)
+    private val repo: RepoDTO? by extraProvider("EXTRA_REPO")
 
-    private lateinit var content: ViewGroup
-    private lateinit var toolbar: Toolbar
-    private lateinit var recyclerView: RecyclerView
-
-    private val onEnterList: () -> Unit = {
-        recyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(recyclerView.context)
-        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, DividerItemDecoration.VERTICAL))
-        recyclerView.adapter = adapter
-    }
+    // region View
+    private val toolbar: Toolbar by viewProvider(R.id.toolbar)
+    private val recyclerView: RecyclerView by viewProvider(R.id.feature_pullrequest_recycler)
+    private val loading: View by viewProvider(R.id.feature_pullrequest_loading)
+    private val error: View by viewProvider(R.id.feature_pullrequest_error)
+    private val empty: View by viewProvider(R.id.feature_pullrequest_empty)
+    // endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pull_request_list)
 
-        content = findViewById(R.id.content)
-        toolbar = findViewById(R.id.toolbar)
+        setupToolbar()
+        setupStateMachine()
+        setupRecycler()
 
+        // Start Observe Data Changes
+        viewModel.listPullRequest
+                .observeData(this, ::onPullRequestReceive)
+                .observeShowLoading(this, ::onPullRequestLoadingReceive)
+                .observeError(this, ::onPullRequestErrorReceive)
+
+        // Request Data
+        repo?.let(viewModel::requestPullRequest)
+    }
+
+    // region Data Handler
+    private fun onPullRequestReceive(pullRequestList: List<PullRequestDTO>) {
+        adapter.setList(pullRequestList)
+        stateMachine.changeState(if (adapter.itemCount == 0) EMPTY_STATE else LIST_STATE)
+    }
+
+    private fun onPullRequestErrorReceive() {
+        stateMachine.changeState(ERROR_STATE)
+    }
+
+    private fun onPullRequestLoadingReceive() {
+        stateMachine.changeState(LOADING_STATE)
+    }
+    // endregion
+
+    // region Setup UI
+    private fun setupToolbar() {
         toolbar.addStatusBarPadding()
         setSupportActionBar(toolbar)
         supportActionBar.enableBack()
-
-        viewModel.repo = intent?.extras?.getParcelable("EXTRA_REPO")
-        viewModel.repo?.let { toolbar.title = it.name.capitalize() }
-
-        setupStateMachine()
-
-        viewModel.listPullRequest.observeData(this) {
-            it?.run {
-                adapter.setList(this)
-                stateMachine.changeState(if (adapter.itemCount == 0) EMPTY_STATE else LIST_STATE)
-            } ?: stateMachine.changeState(LOADING_STATE)
-        }
-
-        viewModel.listPullRequest.observeError(this) {
-            stateMachine.changeState(ERROR_STATE)
-        }
-
+        repo?.let { toolbar.title = it.name.capitalize() }
     }
 
-    private fun setupStateMachine() {
-        stateMachine.setup {
-            state(LOADING_STATE) {
-                scene(R.layout.sc_default_loading to content)
-                transition(fade)
-            }
-            state(LIST_STATE) {
-                scene(R.layout.sc_default_list to content)
-                transition(fade)
-                onEnter(onEnterList)
-            }
-            state(EMPTY_STATE) {
-                scene(R.layout.sc_pull_request_list_empty to content)
-                transition(fade)
-            }
-            state(ERROR_STATE) {
-                scene(R.layout.sc_pull_request_list_error to content)
-                transition(fade)
-            }
-            config {
-                initialState = LOADING_STATE
-            }
+    private fun setupStateMachine() = stateMachine.setup {
+        state(LOADING_STATE) {
+            gones(recyclerView, error, empty)
+            visibles(loading)
+        }
+        state(LIST_STATE) {
+            gones(loading, error, empty)
+            visibles(recyclerView)
+        }
+        state(EMPTY_STATE) {
+            gones(recyclerView, error, loading)
+            visibles(empty)
+        }
+        state(ERROR_STATE) {
+            gones(recyclerView, loading, empty)
+            visibles(error)
+        }
+        config {
+            initialState = LOADING_STATE
         }
     }
 
+    private fun setupRecycler() {
+        recyclerView.layoutManager = LinearLayoutManager(recyclerView.context)
+        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, DividerItemDecoration.VERTICAL))
+        recyclerView.adapter = adapter
+    }
+    // endregion
+
+    // region Click Handler
     private fun onPullRequestClick(pullRequest: PullRequestDTO) {
-        toast("¯\\_(ツ)_/¯")
+        snack("PR: ${pullRequest.id} ¯\\_(ツ)_/¯")
     }
+    // endregion
 }

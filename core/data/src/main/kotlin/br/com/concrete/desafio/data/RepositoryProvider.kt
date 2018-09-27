@@ -4,5 +4,4 @@ object RepositoryProvider {
 
     val repoRepository: RepoRepository by lazy(::RepoRepositoryImpl)
     val pullRequestRepository: PullRequestRepository by lazy(::PullRequestRepositoryImpl)
-
 }

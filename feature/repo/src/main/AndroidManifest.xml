@@ -3,7 +3,9 @@
     package="br.com.concrete.desafio.feature.repo">
 
     <application tools:ignore="AllowBackup,GoogleAppIndexingWarning,MissingApplicationIcon">
-        <activity android:name=".RepoListActivity" />
+        <activity
+            android:name=".RepoListActivity"
+            android:theme="@style/AppTheme.Repo" />
     </application>
 
 

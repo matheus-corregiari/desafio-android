@@ -50,6 +50,9 @@ dependencies {
     // Log Tracking
     api "com.jakewharton.timber:timber:$versions.timber"
 
+    // GreenRobot
+    api "org.greenrobot:eventbus:$versions.eventbus"
+
     // Android Arch
     api "android.arch.lifecycle:runtime:$versions.arch"
     api "android.arch.lifecycle:extensions:$versions.arch"

@@ -5,19 +5,18 @@ import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
-import android.transition.Fade
-import android.transition.Transition
-import android.view.ViewGroup
-import br.com.arch.toolkit.recycler.adapter.SimpleAdapter
-import br.com.arch.toolkit.statemachine.SceneStateMachine
+import android.view.View
+import br.com.arch.toolkit.statemachine.ViewStateMachine
 import br.com.arch.toolkit.statemachine.config
-import br.com.arch.toolkit.statemachine.scene
 import br.com.arch.toolkit.statemachine.setup
 import br.com.arch.toolkit.statemachine.state
 import br.com.concrete.desafio.base.BaseActivity
+import br.com.concrete.desafio.base.adapter.PaginatingRecyclerAdapter
+import br.com.concrete.desafio.base.delegate.viewModelProvider
+import br.com.concrete.desafio.base.delegate.viewProvider
 import br.com.concrete.desafio.base.extension.addStatusBarPadding
 import br.com.concrete.desafio.base.intentPullRequestList
-import br.com.concrete.desafio.base.viewModelProvider
+import br.com.concrete.desafio.data.model.Page
 import br.com.concrete.desafio.data.model.dto.RepoDTO
 import br.com.concrete.desafio.feature.repo.item.RepoItemView
 
@@ -30,76 +29,93 @@ class RepoListActivity : BaseActivity() {
 
     private val viewModel by viewModelProvider(RepoListViewModel::class)
 
-    private val stateMachine = SceneStateMachine()
-    private val fade: Transition = Fade()
+    private val stateMachine = ViewStateMachine()
+    private val adapter = PaginatingRecyclerAdapter(::RepoItemView)
+            .loadMore(::onLoadMore)
 
-//    private val onLoadMore: (Int) -> Unit = { page ->
-//        viewModel.search(this, page,
-//                success = adapter::addPage,
-//                error = { adapter.failPage() })
-//    }
-
-    private val adapter = SimpleAdapter(::RepoItemView).withListener(::onRepoItemClick)
-
-    private lateinit var content: ViewGroup
-    private lateinit var toolbar: Toolbar
-    private lateinit var recyclerView: RecyclerView
-
-    private val onEnterList = {
-        recyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(recyclerView.context)
-        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, DividerItemDecoration.VERTICAL))
-        recyclerView.adapter = adapter
-    }
+    // region View
+    private val toolbar: Toolbar by viewProvider(R.id.toolbar)
+    private val recyclerView: RecyclerView by viewProvider(R.id.feature_repo_recycler)
+    private val loading: View by viewProvider(R.id.feature_repo_loading)
+    private val error: View by viewProvider(R.id.feature_repo_error)
+    private val empty: View by viewProvider(R.id.feature_repo_empty)
+    // endregion
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_repo_list)
 
-        content = findViewById(R.id.content)
-        toolbar = findViewById(R.id.toolbar)
+        setupToolbar()
+        setupStateMachine()
+        setupRecycler()
 
+        // Start Observe Data Changes
+        viewModel.repoList
+                .observeSingleData(this, ::onRepoReceive)
+                .observeSingleShowLoading(this, ::onRepoLoadingReceive)
+                .observeSingleError(this, ::onRepoErrorReceive)
+    }
+
+    private fun onLoadMore(nextPage: Int) {
+        viewModel.search(nextPage)
+                .observeSingleData(this, adapter::addPage)
+                .observeSingleError(this, adapter::failPage)
+    }
+
+    // region Data Handler
+    private fun onRepoReceive(repoPage: Page<RepoDTO>) {
+        adapter.addPage(repoPage)
+        stateMachine.changeState(if (adapter.itemCount == 0) EMPTY_STATE else LIST_STATE)
+    }
+
+    private fun onRepoErrorReceive() {
+        stateMachine.changeState(ERROR_STATE)
+    }
+
+    private fun onRepoLoadingReceive() {
+        stateMachine.changeState(LOADING_STATE)
+    }
+    // endregion
+
+    // region Setup UI
+    private fun setupToolbar() {
         toolbar.addStatusBarPadding()
         setSupportActionBar(toolbar)
-
-        setupStateMachine()
-
-        viewModel.repoList.observeSingleData(this) {
-            it?.run {
-                adapter.setList(this.items)
-                stateMachine.changeState(if (adapter.itemCount == 0) EMPTY_STATE else LIST_STATE)
-            } ?: stateMachine.changeState(LOADING_STATE)
-        }
-
-        viewModel.repoList.observeSingleError(this) { stateMachine.changeState(ERROR_STATE) }
     }
 
-    private fun setupStateMachine() {
-        stateMachine.setup {
-            state(LOADING_STATE) {
-                scene(R.layout.sc_default_loading to content)
-                transition(fade)
-            }
-            state(LIST_STATE) {
-                scene(R.layout.sc_default_list to content)
-                transition(fade)
-                onEnter(onEnterList)
-            }
-            state(EMPTY_STATE) {
-                scene(R.layout.sc_repo_list_empty to content)
-                transition(fade)
-            }
-            state(ERROR_STATE) {
-                scene(R.layout.sc_repo_list_error to content)
-                transition(fade)
-            }
-            config {
-                initialState = LOADING_STATE
-            }
+    private fun setupStateMachine() = stateMachine.setup {
+        state(LOADING_STATE) {
+            gones(recyclerView, error, empty)
+            visibles(loading)
+        }
+        state(LIST_STATE) {
+            gones(loading, error, empty)
+            visibles(recyclerView)
+        }
+        state(EMPTY_STATE) {
+            gones(recyclerView, error, loading)
+            visibles(empty)
+        }
+        state(ERROR_STATE) {
+            gones(recyclerView, loading, empty)
+            visibles(error)
+        }
+        config {
+            initialState = LOADING_STATE
         }
     }
 
+    private fun setupRecycler() {
+        adapter.withListener(::onRepoItemClick)
+        recyclerView.layoutManager = LinearLayoutManager(recyclerView.context)
+        recyclerView.addItemDecoration(DividerItemDecoration(recyclerView.context, DividerItemDecoration.VERTICAL))
+        recyclerView.adapter = adapter
+    }
+    // endregion
+
+    // region Click Handler
     private fun onRepoItemClick(repo: RepoDTO) {
         startActivity(intentPullRequestList(repo))
     }
+    // endregion
 }

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activityPullRequestRoot"
+    android:id="@+id/feature_pullrequest_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -14,10 +14,29 @@
         android:layout_height="wrap_content"
         app:navigationIcon="@drawable/ic_back" />
 
-    <FrameLayout
-        android:id="@+id/content"
+    <TextView
+        android:id="@+id/feature_pullrequest_empty"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white" />
+        android:gravity="center"
+        android:text="@string/pull_request_list_empty" />
+
+    <TextView
+        android:id="@+id/feature_pullrequest_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="@string/pull_request_list_error" />
+
+    <ProgressBar
+        android:id="@+id/feature_pullrequest_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/feature_pullrequest_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </LinearLayout>
