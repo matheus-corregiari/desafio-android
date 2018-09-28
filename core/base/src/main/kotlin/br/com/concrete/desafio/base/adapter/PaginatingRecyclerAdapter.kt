@@ -72,7 +72,7 @@ open class PaginatingRecyclerAdapter<MODEL, VIEW>(private val creator: (context:
         hasError = false
         total = page.totalCount.toInt()
 
-        if (hasLoadingItem) removeLoadingItem()
+        if (hasLoadingItem && nextPage == null) removeLoadingItem()
 
         setList(items.plus(page.items))
 
@@ -100,6 +100,5 @@ open class PaginatingRecyclerAdapter<MODEL, VIEW>(private val creator: (context:
     private fun onProgressErrorClick(model: Boolean) {
         hasError = !model
         notifyItemChanged(items.size)
-        nextPage?.let { loadMore?.invoke(it) }
     }
 }

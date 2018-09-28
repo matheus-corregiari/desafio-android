@@ -8,10 +8,10 @@ import br.com.concrete.desafio.data.extension.writeTypedObjectCompat
 import com.google.gson.annotations.Expose
 
 data class PullRequestDTO(
-        @Expose val id: Long,
-        @Expose val title: String,
-        @Expose val user: UserDTO,
-        @Expose val body: String?
+    @Expose val id: Long = 0,
+    @Expose val title: String = "",
+    @Expose val user: UserDTO = UserDTO(),
+    @Expose val body: String? = ""
 ) : KParcelable {
     companion object {
         @JvmField val CREATOR = parcelableCreator(::PullRequestDTO)

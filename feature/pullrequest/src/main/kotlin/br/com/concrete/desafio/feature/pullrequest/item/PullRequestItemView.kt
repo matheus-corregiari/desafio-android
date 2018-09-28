@@ -11,17 +11,17 @@ import android.widget.TextView
 import br.com.arch.toolkit.recycler.adapter.ViewBinder
 import br.com.concrete.desafio.base.delegate.viewProvider
 import br.com.concrete.desafio.base.extension.loadUrl
-import br.com.concrete.desafio.data.model.dto.PullRequestDTO
+import br.com.concrete.desafio.feature.pullrequest.PullRequestVO
 import br.com.concrete.desafio.feature.pullrequest.R
 
-class PullRequestItemView : RelativeLayout, ViewBinder<PullRequestDTO> {
+class PullRequestItemView : RelativeLayout, ViewBinder<PullRequestVO> {
 
-    //region View
+    // region View
     private val title: TextView by viewProvider(R.id.title)
     private val description: TextView by viewProvider(R.id.description)
     private val avatar: ImageView by viewProvider(R.id.avatar)
-    private val userLogin: TextView by viewProvider(R.id.userLogin)
-    //endregion
+    private val username: TextView by viewProvider(R.id.userLogin)
+    // endregion
 
     constructor(context: Context) : this(context, null)
 
@@ -36,10 +36,10 @@ class PullRequestItemView : RelativeLayout, ViewBinder<PullRequestDTO> {
         View.inflate(context, R.layout.item_pull_request, this)
     }
 
-    override fun bind(model: PullRequestDTO) {
-        title.text = model.title.capitalize()
-        description.text = model.body?.capitalize() ?: ""
-        avatar.loadUrl(model.user.avatarUrl)
-        userLogin.text = model.user.login.capitalize()
+    override fun bind(model: PullRequestVO) {
+        title.text = model.title
+        description.text = model.description
+        avatar.loadUrl(model.avatar)
+        username.text = model.username
     }
 }

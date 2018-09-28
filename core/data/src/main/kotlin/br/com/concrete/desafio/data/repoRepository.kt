@@ -18,5 +18,5 @@ internal class RepoRepositoryImpl : RepoRepository {
 
     override fun requestPage(page: Int) = api.searchRepositories(page = page, perPage = 10)
 
-    override fun list() = requestPage(0)
+    override fun list() = requestPage(1)
 }

@@ -9,7 +9,7 @@ class RepoListViewModel : ViewModel() {
 
     fun search(page: Int) = RepositoryProvider.repoRepository.requestPage(page).onNext {
         repoList.getData()?.let { data ->
-            data.items.addAll(it.items)
+            data.items.plus(it.items)
             data.nextPage = it.nextPage
         }
     }

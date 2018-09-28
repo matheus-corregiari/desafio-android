@@ -12,10 +12,10 @@ import br.com.concrete.desafio.base.delegate.viewProvider
 
 class ProgressItemView : FrameLayout, ViewBinder<Boolean> {
 
-    //region View
+    // region View
     private val progress: View by viewProvider(R.id.progress_item_progress)
     private val error: View by viewProvider(R.id.progress_item_try_again)
-    //endregion
+    // endregion
 
     constructor(context: Context) : this(context, null)
 

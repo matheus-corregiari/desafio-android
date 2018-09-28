@@ -1,3 +1,5 @@
+apply from: "$rootDir/tools/jacoco-unified.gradle"
+
 buildscript {
     ext.kotlin_version = '1.2.71'
     ext.android_plugin_version = '3.2.0'

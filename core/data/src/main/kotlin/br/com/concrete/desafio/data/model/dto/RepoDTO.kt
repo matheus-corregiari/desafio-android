@@ -8,13 +8,13 @@ import br.com.concrete.desafio.data.extension.writeTypedObjectCompat
 import com.google.gson.annotations.Expose
 
 data class RepoDTO(
-        @Expose val id: Long,
-        @Expose val name: String,
-        @Expose val fullName: String,
-        @Expose val description: String?,
-        @Expose val forks: Long,
-        @Expose val stargazersCount: Long,
-        @Expose val owner: UserDTO
+    @Expose val id: Long = 0,
+    @Expose val name: String = "",
+    @Expose val fullName: String = "",
+    @Expose val description: String? = null,
+    @Expose val forks: Long = 0,
+    @Expose val stargazersCount: Long = 0,
+    @Expose val owner: UserDTO = UserDTO()
 ) : KParcelable {
     companion object {
         @JvmField val CREATOR = parcelableCreator(::RepoDTO)

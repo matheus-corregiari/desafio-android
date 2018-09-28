@@ -18,7 +18,6 @@ import br.com.concrete.desafio.base.delegate.viewProvider
 import br.com.concrete.desafio.base.extension.addStatusBarPadding
 import br.com.concrete.desafio.base.extension.enableBack
 import br.com.concrete.desafio.base.extension.snack
-import br.com.concrete.desafio.data.model.dto.PullRequestDTO
 import br.com.concrete.desafio.data.model.dto.RepoDTO
 import br.com.concrete.desafio.feature.pullrequest.item.PullRequestItemView
 
@@ -59,11 +58,11 @@ class PullRequestListActivity : BaseActivity() {
                 .observeError(this, ::onPullRequestErrorReceive)
 
         // Request Data
-        repo?.let(viewModel::requestPullRequest)
+        repo?.let(viewModel::requestPullRequest) ?: onPullRequestErrorReceive()
     }
 
     // region Data Handler
-    private fun onPullRequestReceive(pullRequestList: List<PullRequestDTO>) {
+    private fun onPullRequestReceive(pullRequestList: List<PullRequestVO>) {
         adapter.setList(pullRequestList)
         stateMachine.changeState(if (adapter.itemCount == 0) EMPTY_STATE else LIST_STATE)
     }
@@ -115,7 +114,7 @@ class PullRequestListActivity : BaseActivity() {
     // endregion
 
     // region Click Handler
-    private fun onPullRequestClick(pullRequest: PullRequestDTO) {
+    private fun onPullRequestClick(pullRequest: PullRequestVO) {
         snack("PR: ${pullRequest.id} ¯\\_(ツ)_/¯")
     }
     // endregion

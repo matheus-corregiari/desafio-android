@@ -23,22 +23,22 @@ internal interface GithubApi {
 
     @GET("search/repositories")
     fun searchRepositories(
-            @Query("q") query: String = "language:Java",
-            @Query("sort") sort: String? = null,
-            @Query("order") order: String? = null,
-            @Query("page") page: Int,
-            @Query("per_page") perPage: Int
+        @Query("q") query: String = "language:Java",
+        @Query("sort") sort: String? = null,
+        @Query("order") order: String? = null,
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int
     ): ResponseLiveData<Page<RepoDTO>>
 
     @GET("repos/{creator}/{repo}/pulls")
     fun listPullRequest(
-            @Path("creator") creator: String,
-            @Path("repo") repo: String,
-            @Query("state") state: String? = null,
-            @Query("head") head: String? = null,
-            @Query("base") base: String? = null,
-            @Query("sort") sort: String? = null,
-            @Query("direction") order: String? = null
+        @Path("creator") creator: String,
+        @Path("repo") repo: String,
+        @Query("state") state: String? = null,
+        @Query("head") head: String? = null,
+        @Query("base") base: String? = null,
+        @Query("sort") sort: String? = null,
+        @Query("direction") order: String? = null
     ): ResponseLiveData<List<PullRequestDTO>>
 }
 

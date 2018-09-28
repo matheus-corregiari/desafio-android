@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name="br.com.concrete.desafio.TestActivity"
+            android:name="br.com.concrete.desafio.test.TestActivity"
             android:label="Test Activity"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>

@@ -33,7 +33,8 @@ fun ActionBar?.enableBack() {
 }
 
 fun ImageView.loadUrl(url: String) {
-    Picasso.with(context).load(url).placeholder(R.drawable.ic_avatar).transform(CircleTransform()).into(this)
+    if (url.isEmpty()) setImageResource(R.drawable.ic_avatar)
+    else Picasso.with(context).load(url).placeholder(R.drawable.ic_avatar).transform(CircleTransform()).into(this)
 }
 
 val View.owner: LifecycleOwner?

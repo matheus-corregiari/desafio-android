@@ -6,10 +6,10 @@ import br.com.concrete.desafio.data.extension.parcelableCreator
 import com.google.gson.annotations.Expose
 
 data class UserDTO(
-        @Expose val login: String,
-        @Expose val id: Long,
-        @Expose val avatarUrl: String,
-        @Expose val score: Int
+    @Expose val login: String = "",
+    @Expose val id: Long = 0,
+    @Expose val avatarUrl: String = "",
+    @Expose val score: Int = 0
 ) : KParcelable {
     companion object {
         @JvmField val CREATOR = parcelableCreator(::UserDTO)

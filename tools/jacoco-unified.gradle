@@ -52,7 +52,7 @@ final Closure<Map<String, Project>> findAllClassesPath = { allChildProjects, fla
     def allClassesDirectories = new ArrayList<String>()
     allChildProjects.each { childProject ->
 
-        final debugTreeJava = fileTree(dir: "${childProject.buildDir}/intermediates/classes/debug/com/itau/latam", excludes: fileFilter)
+        final debugTreeJava = fileTree(dir: "${childProject.buildDir}/intermediates/classes/debug", excludes: fileFilter)
         final debugTreeKotlin = fileTree(dir: "${childProject.buildDir}/tmp/kotlin-classes/debug", excludes: fileFilterKt)
 
         final flavorDebugTreeJava = fileTree(dir: "${childProject.buildDir}/intermediates/classes/$flavorName/debug/com/itau/latam", excludes: fileFilter)
@@ -103,5 +103,28 @@ childProjects.each { childProjectPair ->
                     }
                 }
         }
+
+
+        if (childProjectPair.value.android.productFlavors.isEmpty() && rootProject.tasks.findByName("jacocoCoverageReport-unified") == null)
+            rootProject.task("jacocoCoverageReport-unified", type: JacocoReport, group: "coverage-report") {
+                def allChildProjects = findAllChildProjects(rootProject)
+                reports {
+                    xml.enabled = true
+                    html.enabled = true
+                }
+
+                sourceDirectories = files(findAllSourcesPath(allChildProjects, ""))
+                classDirectories = files(findAllClassesPath(allChildProjects, ""))
+                executionData = files(findAllCoverageFiles(allChildProjects, ""))
+
+                doFirst {
+                    println "\n---------- Start to generate the Unified coverage report ----------"
+                }
+
+                doLast {
+                    println "\n---------- Unified coverage report has finished!! ----------\n"
+                    println "Report path -> file://${reports.html.destination}/index.html\n"
+                }
+            }
     }
 }

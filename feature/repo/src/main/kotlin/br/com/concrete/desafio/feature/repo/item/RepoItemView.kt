@@ -16,14 +16,14 @@ import br.com.concrete.desafio.feature.repo.R
 
 class RepoItemView : RelativeLayout, ViewBinder<RepoDTO> {
 
-    //region View
+    // region View
     private val title: TextView by viewProvider(R.id.title)
     private val description: TextView by viewProvider(R.id.description)
     private val forks: TextView by viewProvider(R.id.forks)
     private val stars: TextView by viewProvider(R.id.stars)
     private val avatar: ImageView by viewProvider(R.id.avatar)
     private val userLogin: TextView by viewProvider(R.id.userLogin)
-    //endregion
+    // endregion
 
     constructor(context: Context) : this(context, null)
 
