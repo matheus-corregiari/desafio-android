@@ -27,9 +27,7 @@ class ExtraProviderDelegate<T>(private val extraName: String, private val keepSt
 
 fun <T> extraProvider(extra: String) = extraProvider<T?>(extra, true)
 fun <T> extraProvider(extra: String, keepState: Boolean) = extraProvider<T?>(extra, keepState, null)
-fun <T> extraProvider(extra: String, default: T) = extraProvider(extra, true, default)
 fun <T> extraProvider(extra: String, keepState: Boolean, default: T) = extraProvider(extra, keepState) { default }
-fun <T> extraProvider(extra: String, default: () -> T) = ExtraProviderDelegate(extra, true, default)
 fun <T> extraProvider(extra: String, keepState: Boolean, default: () -> T) = ExtraProviderDelegate(extra, keepState, default)
 
 @Suppress("UNCHECKED_CAST")

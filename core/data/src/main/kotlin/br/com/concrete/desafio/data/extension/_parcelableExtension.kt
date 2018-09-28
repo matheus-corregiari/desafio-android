@@ -1,5 +1,3 @@
-@file:JvmName("ParcelableUtils")
-
 package br.com.concrete.desafio.data.extension
 
 import android.os.Parcel

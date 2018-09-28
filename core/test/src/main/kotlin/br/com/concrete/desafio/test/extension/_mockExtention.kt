@@ -1,7 +1,6 @@
 package br.com.concrete.desafio.test.extension
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
 import br.com.concrete.desafio.data.livedata.MediatorResponseLiveData
 import br.com.concrete.desafio.data.livedata.ResponseLiveData
 import br.com.concrete.desafio.data.model.DataResult
@@ -16,10 +15,6 @@ fun <T> T.assertCall(numberOfCall: Int): T {
 
 fun <T> ResponseLiveData<T>?.mockResponse(): ResponseLiveData<T> {
     return mockResponse(MediatorResponseLiveData())!!
-}
-
-fun <T> LiveData<T>?.mockResponse(): LiveData<T> {
-    return mockResponse(MutableLiveData())!!
 }
 
 fun <T> T?.mockResponse(value: T?): T? {

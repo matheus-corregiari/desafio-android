@@ -1,5 +1,3 @@
-@file:JvmName("HeaderUtils")
-
 package br.com.concrete.desafio.data.extension
 
 import retrofit2.Response

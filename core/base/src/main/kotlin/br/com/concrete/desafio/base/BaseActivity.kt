@@ -2,9 +2,9 @@ package br.com.concrete.desafio.base
 
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
-import br.com.concrete.desafio.base.extension.snack
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
+import timber.log.Timber
 
 abstract class BaseActivity : AppCompatActivity() {
 
@@ -20,10 +20,6 @@ abstract class BaseActivity : AppCompatActivity() {
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
     open fun onDefaultErrorReceived(error: Throwable) {
-        // TODO Do something
-    }
-
-    open fun onErrorReceived(error: Throwable) {
-        snack(error.message ?: "")
+        Timber.e(error)
     }
 }

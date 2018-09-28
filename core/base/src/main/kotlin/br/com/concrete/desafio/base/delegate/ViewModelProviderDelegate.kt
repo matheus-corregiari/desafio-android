@@ -4,8 +4,6 @@ import android.arch.lifecycle.ViewModel
 import android.arch.lifecycle.ViewModelProviders
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
-import android.view.View
-import br.com.concrete.desafio.base.extension.activity
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
@@ -18,10 +16,6 @@ class ViewModelProviderDelegate<out T : ViewModel>(private val clazz: KClass<T>,
     operator fun getValue(thisRef: Fragment, property: KProperty<*>) = if (fromActivity)
         buildViewModel(activity = thisRef.activity as? AppCompatActivity)
     else buildViewModel(fragment = if (fromParentFragment) thisRef.parentFragment else thisRef)
-
-    operator fun getValue(thisRef: View, property: KProperty<*>): T {
-        return buildViewModel(activity = thisRef.activity)
-    }
 
     private fun buildViewModel(activity: AppCompatActivity? = null, fragment: Fragment? = null): T {
         if (viewModel != null) return viewModel!!

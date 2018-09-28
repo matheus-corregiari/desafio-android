@@ -1,7 +1,6 @@
 package br.com.concrete.desafio.test
 
 import android.app.Activity
-import android.content.Intent
 import android.support.test.espresso.intent.rule.IntentsTestRule
 import br.com.concrete.desafio.data.RepositoryProvider
 import net.vidageek.mirror.dsl.Mirror
@@ -32,19 +31,5 @@ open class BaseActivityTest<AC : Activity>(activityClass: KClass<AC>) {
         val classToMock = Class.forName(field.kotlinProperty!!.returnType.toString())
         val mockedField = Mockito.mock(classToMock)
         Mirror().on(RepositoryProvider::class.java).set().field(field).withValue(lazy { mockedField })
-    }
-}
-
-open class BaseFragmentTest : BaseActivityTest<TestActivity>(TestActivity::class) {
-    @Before
-    fun launchActivity() {
-        rule.launchActivity(Intent())
-    }
-}
-
-open class BaseViewTest : BaseActivityTest<TestActivity>(TestActivity::class) {
-    @Before
-    fun launchActivity() {
-        rule.launchActivity(Intent())
     }
 }

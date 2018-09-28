@@ -1,23 +1,39 @@
+-keep class br.com.concrete.desafio.data.model.dto.** { *; }
+-keep class br.com.concrete.desafio.data.model.dto.*$Companion { *; }
 -keep class br.com.concrete.desafio.data.model.** { *; }
 -keep class br.com.concrete.desafio.data.model.*$Companion { *; }
 
+-dontnote kotlin.jvm.internal.DefaultConstructorMarker
+-dontnote kotlin.reflect.jvm.internal.ReflectionFactoryImpl
+-dontnote kotlin.internal.jdk8.JDK8PlatformImplementations
+-dontnote kotlin.internal.JRE8PlatformImplementations
+-dontnote kotlin.internal.JRE7PlatformImplementations
 -dontnote android.net.http.*
 -dontnote org.apache.http.**
+
+# Gson
+-keepattributes Signature
+-keepattributes *Annotation*
+-dontwarn sun.misc.**
+-dontnote sun.misc.Unsafe
+-keep class com.google.gson.examples.android.model.** { *; }
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
 
 # OkHttp
 -dontwarn okio.**
 -dontwarn javax.annotation.Nullable
 -dontwarn javax.annotation.ParametersAreNonnullByDefault
 -dontwarn javax.annotation.concurrent.GuardedBy
+-dontwarn org.conscrypt.Conscrypt
+-dontwarn org.conscrypt.OpenSSLProvider
+-dontwarn org.conscrypt.OpenSSLProvider
 
 # Retrofit
-# Platform calls Class.forName on types which do not exist on Android to determine platform.
 -dontnote retrofit2.Platform
-# Platform used when running on Java 8 VMs. Will not be used at runtime.
 -dontwarn retrofit2.Platform$Java8
-# Retain generic type information for use by reflection by converters and adapters.
 -keepattributes Signature
-# Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
 
 # EventBus
@@ -26,8 +42,6 @@
     @org.greenrobot.eventbus.Subscribe <methods>;
 }
 -keep enum org.greenrobot.eventbus.ThreadMode { *; }
-
-# Only required if you use AsyncExecutor
 -keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
     <init>(java.lang.Throwable);
 }

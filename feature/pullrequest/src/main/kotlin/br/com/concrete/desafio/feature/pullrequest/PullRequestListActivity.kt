@@ -81,7 +81,7 @@ class PullRequestListActivity : BaseActivity() {
         toolbar.addStatusBarPadding()
         setSupportActionBar(toolbar)
         supportActionBar.enableBack()
-        repo?.let { toolbar.title = it.name.capitalize() }
+        repo?.let { supportActionBar?.title = it.name.toLowerCase().capitalize() }
     }
 
     private fun setupStateMachine() = stateMachine.setup {
